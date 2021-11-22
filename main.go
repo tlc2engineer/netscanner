@@ -8,10 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-/**
-* Сканирование HMI и ENG сети.
- */
-
 func main() {
 
 	fmt.Println("GO!")
@@ -32,4 +28,5 @@ func main() {
 		}
 	})
 	r.Run()
+
 }

@@ -2,6 +2,7 @@ package hosts
 
 import (
 	"encoding/csv"
+	"fmt"
 	"os"
 )
 
@@ -26,4 +27,64 @@ func ReadAdresses(fname string) error {
 	}
 	return nil
 
+}
+
+func RemoveAddress(name, ip string) error {
+	file, err := os.Open(AddrFilename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	reader := csv.NewReader(file)
+	reader.Comma = ';'
+	records, err := reader.ReadAll()
+	if err != nil {
+		return err
+	}
+	num := -1
+	for i, record := range records {
+		if record[0] == name && record[1] == ip {
+			num = i
+			break
+		}
+	}
+	if num == -1 {
+		return fmt.Errorf("Запись не найдена")
+	}
+	records = append(records[:num], records[num+1:]...)
+	writer := csv.NewWriter(file)
+	writer.Comma = ';'
+	err = writer.WriteAll(records)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+func AddAddress(name, ip, hosttype string, on bool) error {
+	file, err := os.Open(AddrFilename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	reader := csv.NewReader(file)
+	reader.Comma = ';'
+	records, err := reader.ReadAll()
+	if err != nil {
+		return err
+	}
+	strOn := "false"
+	if on {
+		strOn = "true"
+	}
+	record := []string{name, ip, hosttype, strOn}
+	records = append(records, record)
+	writer := csv.NewWriter(file)
+	writer.Comma = ';'
+	err = writer.WriteAll(records)
+	if err != nil {
+		return err
+	}
+	return nil
 }

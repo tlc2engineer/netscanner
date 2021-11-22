@@ -2,7 +2,6 @@ package controller
 
 import (
 	"NETSCANNER/hosts"
-	"fmt"
 	"log"
 	"time"
 )
@@ -18,9 +17,10 @@ func mainCycle() {
 			if address.IsError() {
 				continue
 			}
+
 			err := address.Check()
 			if err != nil {
-				log.Println(err)
+				log.Println("Check error", address.IP, err)
 			}
 		}
 		time.Sleep(time.Millisecond * timeout)
@@ -34,6 +34,6 @@ func Process() {
 	}
 	//hosts.InitAdress()
 
-	fmt.Println("Запуск цикла")
+	log.Println("Запуск цикла")
 	mainCycle()
 }
