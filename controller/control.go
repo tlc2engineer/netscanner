@@ -20,7 +20,6 @@ func mainCycle() {
 				host.Alive = true
 				continue
 			}
-
 			if !host.AlarmOn || (host.AlarmOn && !host.Alive) {
 				if host.AlarmOn {
 					alarm = true
