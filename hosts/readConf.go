@@ -1,88 +1,71 @@
 package hosts
 
 import (
-	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"os"
 )
 
-const AddrFilename = "addr.conf"
+const AddrFilename = "conf.json"
 
-func ReadAdresses(fname string) error {
-	Adresses = make([]*Address, 0)
-	file, err := os.Open(fname)
-	defer file.Close()
+func JsonReadConf() error {
+	bts, err := os.ReadFile(AddrFilename)
 	if err != nil {
 		return err
 	}
-	reader := csv.NewReader(file)
-	reader.Comma = ';'
-	records, err := reader.ReadAll()
+	Hosts = make([]*Host, 0)
+	err = json.Unmarshal(bts, &Hosts)
 	if err != nil {
 		return err
-	}
-	for _, record := range records {
-		addr := NewAddress(record[0], record[1], 4, record[2], record[3] == "true")
-		Adresses = append(Adresses, addr)
 	}
 	return nil
-
 }
 
-func RemoveAddress(name, ip string) error {
-	file, err := os.Open(AddrFilename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	reader := csv.NewReader(file)
-	reader.Comma = ';'
-	records, err := reader.ReadAll()
-	if err != nil {
-		return err
-	}
-	num := -1
-	for i, record := range records {
-		if record[0] == name && record[1] == ip {
-			num = i
-			break
+func RemoveHost(ip string) error {
+	for i, host := range Hosts {
+		if host.IP == ip {
+			Hosts = append(Hosts[:i], Hosts[i+1:]...)
+			err := JsonWriteConf()
+			if err != nil {
+				return err
+			}
+			return nil
 		}
 	}
-	if num == -1 {
-		return fmt.Errorf("Запись не найдена")
-	}
-	records = append(records[:num], records[num+1:]...)
-	writer := csv.NewWriter(file)
-	writer.Comma = ';'
-	err = writer.WriteAll(records)
+	return fmt.Errorf("нет такого IP")
+
+}
+
+func AddHost(host *Host) error {
+	Hosts = append(Hosts, host)
+	err := JsonWriteConf()
 	if err != nil {
 		return err
 	}
 	return nil
-
 }
 
-func AddAddress(name, ip, hosttype string, on bool) error {
-	file, err := os.Open(AddrFilename)
+func UpdateHost(host *Host) error {
+	ip := host.IP
+	for i, h := range Hosts {
+		if h.IP == ip {
+			Hosts[i] = host
+			err := JsonWriteConf()
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	return fmt.Errorf("нет такого IP")
+}
+
+func JsonWriteConf() error {
+	bts, err := json.Marshal(Hosts)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
-	reader := csv.NewReader(file)
-	reader.Comma = ';'
-	records, err := reader.ReadAll()
-	if err != nil {
-		return err
-	}
-	strOn := "false"
-	if on {
-		strOn = "true"
-	}
-	record := []string{name, ip, hosttype, strOn}
-	records = append(records, record)
-	writer := csv.NewWriter(file)
-	writer.Comma = ';'
-	err = writer.WriteAll(records)
+	err = os.WriteFile("conf.json", bts, os.ModeAppend)
 	if err != nil {
 		return err
 	}

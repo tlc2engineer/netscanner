@@ -1,39 +1,54 @@
 package controller
 
 import (
-	"NETSCANNER/hosts"
-	"log"
+	"netscan/hosts"
+	"netscan/lowlevel"
 	"time"
 )
 
-const timeout = 1000
-
+var Alarm bool
 var Run = true
 
 func mainCycle() {
 	for Run {
-		for _, address := range hosts.Adresses {
-
-			if address.IsError() {
+		alarm := false
+		for _, host := range hosts.Hosts {
+			time.Sleep(time.Second)
+			_, _, err := lowlevel.Ping(host.IP)
+			host.LastScan = time.Now()
+			if err == nil {
+				host.Alive = true
 				continue
 			}
 
-			err := address.Check()
-			if err != nil {
-				log.Println("Check error", address.IP, err)
+			if !host.AlarmOn || (host.AlarmOn && !host.Alive) {
+				if host.AlarmOn {
+					alarm = true
+				}
+				host.Alive = false
+				continue
 			}
+			var i int
+			for i = 0; i < 3; i++ {
+				_, _, err := lowlevel.Ping(host.IP)
+				if err == nil {
+					break
+				}
+			}
+			if i == 3 {
+				host.Alive = false
+				alarm = true
+			}
+
 		}
-		time.Sleep(time.Millisecond * timeout)
+		Alarm = alarm
+
 	}
 }
 
 func Process() {
-	err := hosts.ReadAdresses(hosts.AddrFilename)
-	if err != nil {
-		log.Fatalf("Ошибка чтения конфигурации: %v", err)
-	}
-	//hosts.InitAdress()
 
-	log.Println("Запуск цикла")
+	hosts.JsonReadConf()
+
 	mainCycle()
 }

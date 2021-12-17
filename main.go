@@ -1,9 +1,11 @@
 package main
 
 import (
-	"NETSCANNER/controller"
-	"NETSCANNER/hosts"
 	"fmt"
+	"netscan/controller"
+
+	"netscan/hosts"
+	"netscan/server"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,12 +17,16 @@ func main() {
 	r := gin.Default()
 	r.GET("/stat", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"hosts": hosts.Adresses,
+			"hosts": hosts.Hosts,
+			"alarm": controller.Alarm,
 		})
 	})
 	r.POST("/stop", func(c *gin.Context) {
 		controller.Run = false
 	})
+	r.POST("/add", server.AddHost)
+	r.POST("/remove", server.RemoveHost)
+	r.POST("/update", server.UpdateHost)
 	r.POST("/start", func(c *gin.Context) {
 		if !controller.Run {
 			controller.Run = true
