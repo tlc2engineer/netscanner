@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
-	"netscan/controller"
-
-	"netscan/hosts"
-	"netscan/server"
 
 	"github.com/gin-gonic/gin"
+	"github.com/tlc2engineer/netscanner/controller"
+	"github.com/tlc2engineer/netscanner/hosts"
+	"github.com/tlc2engineer/netscanner/server"
 )
 
 func main() {

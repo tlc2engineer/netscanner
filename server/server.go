@@ -2,9 +2,9 @@ package server
 
 import (
 	"net/http"
-	"netscan/hosts"
 
 	"github.com/gin-gonic/gin"
+	"github.com/tlc2engineer/netscanner/hosts"
 )
 
 func AddHost(c *gin.Context) {

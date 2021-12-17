@@ -1,9 +1,10 @@
 package controller
 
 import (
-	"netscan/hosts"
-	"netscan/lowlevel"
 	"time"
+
+	"github.com/tlc2engineer/netscanner/hosts"
+	"github.com/tlc2engineer/netscanner/lowlevel"
 )
 
 var Alarm bool
